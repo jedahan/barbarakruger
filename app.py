@@ -38,23 +38,14 @@ class MarkovHandler(tornado.web.RequestHandler):
 		screen_name = self.get_argument('screen_name')
 		params = {'count':200, 'screen_name':screen_name}
 
-		# # this is for live data fetching
-		resp = urllib.urlopen(
-			'http://api.twitter.com/1/statuses/user_timeline.json?' + \
-			 urllib.urlencode(params))
-		rawjson = resp.read()
-
 		generator = CharacterMarkovGenerator(options.n, 140)
-		
+
 		# below should be a backup for the performance
-		# data = json.loads(open("dumpdump.json").read())
-		# print data
+		with open('dump.csv') as f:
+			  data = f.readlines()
 
-
-		data = json.loads(rawjson)
-		# print data
 		for tweet in data:
-				generator.feed(tweet['text']) # this shows the text content of the tweet
+				generator.feed(tweet) # this shows the text content of the tweet
 		self.write(generator.generate())
 
 class AboutHandler(tornado.web.RequestHandler):
@@ -67,5 +58,3 @@ if __name__ == "__main__":
 	http_server = tornado.httpserver.HTTPServer(Application())
 	http_server.listen(options.port)
 	tornado.ioloop.IOLoop.instance().start()
-
-
